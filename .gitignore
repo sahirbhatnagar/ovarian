@@ -1,0 +1,11 @@
+# Ignore LaTeX compile byproduct files #
+########################################
+*.aux
+*.bbl
+*.blg
+cache/*
+figure/*
+*.log
+*.pdf
+*.gz
+*.tex
