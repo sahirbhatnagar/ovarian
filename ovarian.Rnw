@@ -1,0 +1,80 @@
+\documentclass{mystyle}
+
+
+\title{Ovarian Cancer TCGA data}
+\author{Sahir Rai Bhatnagar}
+
+<<echo=FALSE, results= 'hide', message = FALSE>>=
+options(width=60)
+require(survival)
+require(rms)
+
+o.pheno<-read.csv("/home/sahir/Dropbox/PhD/Year 1/Prelim Analysis Nov 2013/ovarian/TCGA_OV_PhenotypeFile.csv",
+                  header=T)[,c("ID","Sample","Barcode.SNP","TP53.class","AgeAtDiagnosis..yrs.",
+                                                         "TUMORSTAGE","TUMORGRADE","ProgressionFreeStatus",
+                                                         "ProgressionFreeSurvival..mos..")]
+o.pheno[o.pheno==""]<-NA
+o.pheno[o.pheno=="Missing"]<-NA
+o.pheno[o.pheno=="TP53 missense (2)"]<-"TP53 missense"
+o.pheno[o.pheno=="TP53 null/missense"]<-"TP53 null"
+
+#o.pheno2<-o.pheno[complete.cases(o.pheno[,c("TP53.class","ProgressionFreeStatus","ProgressionFreeSurvival..mos..")]),  ]
+o.pheno2<-o.pheno[complete.cases(o.pheno),  ]
+o.pheno2$cens[o.pheno2$ProgressionFreeStatus=="Recurred/Progressed"]<-1
+o.pheno2$cens[o.pheno2$ProgressionFreeStatus=="DiseaseFree"]<-0
+o.pheno2$time<-as.numeric(as.character(o.pheno2$ProgressionFreeSurvival..mos..))
+o.pheno2$TP53.class<-factor(o.pheno2$TP53.class)
+o.pheno2$TUMORSTAGE<-factor(o.pheno2$TUMORSTAGE)
+o.pheno2$TUMORGRADE<-factor(o.pheno2$TUMORGRADE)
+
+
+#conver tumorstage into numerical
+o.pheno2$tumorstage<-sapply(o.pheno2$TUMORSTAGE, function(x) {
+  if (x %in% c("IIA","IIB","IIC")) 2 else if 
+     (x %in% c("IIIA","IIIB","IIIC")) 3 else 4 } )
+source("/home/sahir/Dropbox/PhD/Year 1/Prelim Analysis Nov 2013/ovarian/ggsurv.R")
+
+@
+
+\begin{document}
+\maketitle
+
+<<km, out.width='.99\\linewidth', fig.keep='last', message=FALSE, echo=FALSE, fig.align='center', fig.pos='htbp', fig.show='asis', fig.cap='Kaplan-Meier curves for TCGA Ovarian Cancer data'>>=
+pheno.obj<-with(o.pheno2,  Surv(time,cens))
+kmfit<-with(o.pheno2, survfit(pheno.obj~TP53.class))
+
+pl2<-ggsurv(kmfit, xlab='Time (months)')
+
+med.surv <- data.frame(time = c(16.6,16.6, 16.8,16.8), quant = c(.5,0,.5,0),
+                       TP53.class = c('TP53 missense', 'TP53 missense', 'TP53 null', 'TP53 null'))
+pl2 + geom_line(data = med.surv, aes(time, quant, group = TP53.class), 
+                col = 'darkblue', linetype = 3) +
+  geom_point(data = med.surv, aes(time, quant, group =TP53.class), col = 'darkblue')+
+  annotate("text", x = 14, y = 0.25, label = "median")
+@
+
+\FloatBarrier
+
+<<desc>>=
+describe(o.pheno2[,c("AgeAtDiagnosis..yrs.","TUMORGRADE","tumorstage")])
+@
+
+
+
+
+<<test>>=
+#log-rank test
+survdiff(pheno.obj~TP53.class, data=o.pheno2)
+
+#wilcoxon test
+wilcox.test(time~TP53.class, data=o.pheno2)
+@
+
+
+<<survplot, out.width='.49\\linewidth', fig.keep='last', message=FALSE, echo=FALSE, fig.align='center', fig.pos='htbp', fig.show='asis', fig.cap='Kaplan-Meier curves for TCGA Ovarian Cancer data'>>=
+with(o.pheno2, survplot(survfit(pheno.obj ~TP53.class), conf='none', fun=qnorm, logt=TRUE  ))
+@
+
+
+
+\end{document}
