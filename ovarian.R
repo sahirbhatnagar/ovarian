@@ -88,8 +88,8 @@ survplot(fit.aft, AgeAtDiagnosis..yrs.=50, TUMORGRADE="G3", tumorstage=4 )
 # expression data
 library(plyr)
 getwd()
-setwd("/home/sahir/Dropbox/PhD/Year 1/Prelim Analysis Nov 2013/ovarian/RNASeq/")
-file.names<-list.files()
+
+file.names<-list.files("data")
 names(file.names)<-basename(file.names)
 
 #read in files
@@ -105,3 +105,21 @@ rnaseq$pp<-sub(" .*", "", rnaseq$pp)
 
 library(sqldf)
 sqldf("select * from rnaseq")
+#hello world 
+
+
+library ( devtools )
+#install_github(repo = "pbdMPI" , username = "RBigData")
+#install_github(repo = "pbdSLAP" , username = "RBigData")
+install_github(repo = "pbdNCDF4" , username = "RBigData")
+install_github(repo = "pbdBASE" , username = "RBigData")
+#install_github(repo = "pbdDMAT", username = "RBigData")
+install_github(repo = "pbdDEMO" , username = "RBigData")
+
+
+#####
+# bigmemory
+library(bigmemory)
+library(biganalytics)
+
+
