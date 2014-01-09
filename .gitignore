@@ -9,3 +9,8 @@ figure/*
 *.pdf
 *.gz
 *.tex
+.Rproj.user
+
+# Ignore RNA_seq data #
+#######################
+data
