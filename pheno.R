@@ -41,10 +41,22 @@ o.pheno2$cens[o.pheno2$ProgressionFreeStatus == "DiseaseFree"] <- 0
 o.pheno2$time <- as.numeric(as.character(o.pheno2$ProgressionFreeSurvival..mos..))
 
 
-# Conver tumorstage into numerical ----------------------------------------
+# Convert tumorstage into numerical ----------------------------------------
 o.pheno2$tumorstage <- sapply(o.pheno2$TUMORSTAGE, function(x) {
     if (x %in% c("IIA", "IIB", "IIC")) 
         2 else if (x %in% c("IIIA", "IIIB", "IIIC")) 
         3 else 4
 }) 
+
+
+# Compare barcodes from phenotype file against gene expression files --------------------
+getwd()
+setwd(paste(getwd(), "/data", sep = ""))
+file.names <- list.files(pattern = "[.]txt$")
+
+# extract barcode from text files
+barcode <- sapply(file.names, function(i) gsub("\\|", " ", as.character(rnaseq$gene))
+
+                  
+                  
 
