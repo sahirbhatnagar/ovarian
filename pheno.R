@@ -48,3 +48,5 @@ o.pheno2$tumorstage <- sapply(o.pheno2$TUMORSTAGE, function(x) {
         3 else 4
 }) 
 
+
+charmatch
