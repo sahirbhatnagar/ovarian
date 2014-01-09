@@ -49,7 +49,7 @@ o.pheno2$tumorstage <- sapply(o.pheno2$TUMORSTAGE, function(x) {
 }) 
 
 
-<<<<<<< HEAD
+
 # Compare barcodes from phenotype file against gene expression files --------------------
 getwd()
 setwd(paste(getwd(), "/data", sep = ""))
@@ -61,6 +61,8 @@ barcode <- sapply(file.names, function(i) gsub("\\|", " ", as.character(rnaseq$g
                   
                   
 
-=======
-charmatch
->>>>>>> 7f067b927f5565d34bff04c01188efff77d80926
+# Character match ---------------------------------------------------------
+
+
+
+
