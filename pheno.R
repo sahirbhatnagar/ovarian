@@ -58,9 +58,9 @@ k <- lapply(o.pheno2$ID, function(i) grep(i,file.names, perl=TRUE, value=TRUE))
 matches <- unlist(k)
 
 
-# Create list of gene names -----------------------------------------------
+# Create gene expression data frame for given id number -----------------------------------------------
 #import gene expression file
-gene.exp <- read.table(matches[1], header=TRUE)
+gene.exp <- read.table(matches[10], header=TRUE)
 
 #extract gene names
 gene.exp$gene <- gsub("\\|", " ", as.character(gene.exp$gene))
@@ -69,14 +69,47 @@ gene.exp$gene <- sub(" .*", "", gene.exp$gene)
 #remove unknown genes
 gene.exp<-gene.exp[!(gene.exp$gene=="?"),]
 
-#unique gene names
-unique.genes <- unique(gene.exp$gene)
+#rename raw_counts column to ID number of person
+type <- "raw_counts"
+id.number <- unique(substring(gene.exp$barcode,first=1,last=12))
+
+id.number<-gsub("-",c("_"),id.number)
+
+colnames(gene.exp)[grepl(type,colnames(gene.exp))] <- id.number
+
+#remove all columns except expression counts and gene names
+gene.exp <- gene.exp[,c("gene",id.number)]
 
 
 
-# Create function to extract gene names for each file ---------------------
+library(data.table)
+gene.exp.big <- as.data.table(gene.exp)
+str(gene.exp.big)
 
-ex.genes <- function(filename, type="raw_counts"){
+gene.exp.avg <- gene.exp.big[,mean(id.number),by='gene']
+
+
+# Create pheno data frame for given id number -----------------------------
+
+#bring in phenotype data for a given ID number
+j<-o.pheno2[o.pheno2$ID==id.number,c("ID","TP53.class","AgeAtDiagnosis..yrs.","cens","time","tumorstage")]
+
+library(reshape)
+pheno.final <- melt(j, id=c("ID" ), measure.vars=c("AgeAtDiagnosis..yrs.","cens","time","tumorstage"))[,2:3]
+colnames(pheno.final)<-c("gene",id.number)
+
+
+
+
+
+
+# Merge gene exp with pheno data frames -----------------------------------
+k<-rbind(gene.exp,pheno.final)
+
+
+# Create function to merge gene exp with pheno data ---------------------
+
+f.gene <- function(filename, type="raw_counts"){
   #import gene expression file
   gene.exp <- read.table(filename, header=TRUE)
   
@@ -87,20 +120,34 @@ ex.genes <- function(filename, type="raw_counts"){
   #remove unknown genes
   gene.exp<-gene.exp[!(gene.exp$gene=="?"),]
   
-  #unique gene names
-  unique.genes <- unique(gene.exp$gene)
+  #rename raw_counts column to ID number of person
+  id.number <- unique(substring(gene.exp$barcode,first=1,last=12))
+  colnames(gene.exp)[grepl(type,colnames(gene.exp))] <- id.number
   
-  return(gene.exp)
+  #remove all columns except expression counts and gene names
+  gene.exp <- gene.exp[,c("gene",id.number)]
+  
+  gene.exp.avg <- ddply(gene.exp,.(gene), function(x) data.frame(gene=x$gene[1],
+                                                                 id.number=mean(x[,2])))
+  
+  #bring in phenotype data for a given ID number
+  j<-o.pheno2[o.pheno2$ID==id.number,c("ID","TP53.class","AgeAtDiagnosis..yrs.","cens","time","tumorstage")]
+  pheno.final <- melt(j, id=c("ID" ), measure.vars=c("AgeAtDiagnosis..yrs.","cens","time","tumorstage"))[,2:3]
+  colnames(pheno.final)<-c("gene",id.number)
+  
+  # Merge gene exp with pheno data frames -----------------------------------
+  k<-rbind(gene.exp.avg,pheno.final)
+    
+  return(k)
 }
 
-d1<-ex.genes(matches[1])
-d2<-ex.genes(matches[2])
 
-k<-sum(!(d1$gene == unique.genes))
+x<-f.gene(matches[2])[1:50,]
+y<-f.gene(matches[3])[1:50,]
+
+dat<-merge(x,y, by.x="gene", all=T)
 
 
-a<-c(1,2,3,4,5)
-b<-c()
 
 # Merge all gene expresssion files into one text file ---------------------
 
