@@ -8,7 +8,7 @@
 
 # Import Data -------------------------------------------------------------
 getwd()
-setwd("/home/sahir/git_repositories/ovarian")
+setwd("/home/sahir/git_repositories/ovarian/")
 
 # From Github
 # library(repmis)
@@ -49,20 +49,65 @@ o.pheno2$tumorstage <- sapply(o.pheno2$TUMORSTAGE, function(x) {
 }) 
 
 
-
-# Compare barcodes from phenotype file against gene expression files --------------------
-getwd()
-setwd(paste(getwd(), "/data", sep = ""))
+# Find people for who we have both phenotype and gene expression data --------------------
+setwd("/home/sahir/git_repositories/ovarian/data")
 file.names <- list.files(pattern = "[.]txt$")
+k <- lapply(o.pheno2$ID, function(i) grep(i,file.names, perl=TRUE, value=TRUE))
 
-# extract barcode from text files
-barcode <- sapply(file.names, function(i) gsub("\\|", " ", as.character(rnaseq$gene))
-
-                  
-                  
-
-# Character match ---------------------------------------------------------
+# files for which we have phenotype data and gene expression data (n=133)
+matches <- unlist(k)
 
 
+# Create list of gene names -----------------------------------------------
+#import gene expression file
+gene.exp <- read.table(matches[1], header=TRUE)
+
+#extract gene names
+gene.exp$gene <- gsub("\\|", " ", as.character(gene.exp$gene))
+gene.exp$gene <- sub(" .*", "", gene.exp$gene)
+
+#remove unknown genes
+gene.exp<-gene.exp[!(gene.exp$gene=="?"),]
+
+#unique gene names
+unique.genes <- unique(gene.exp$gene)
 
 
+
+# Create function to extract gene names for each file ---------------------
+
+ex.genes <- function(filename, type="raw_counts"){
+  #import gene expression file
+  gene.exp <- read.table(filename, header=TRUE)
+  
+  #extract gene names
+  gene.exp$gene <- gsub("\\|", " ", as.character(gene.exp$gene))
+  gene.exp$gene <- sub(" .*", "", gene.exp$gene)
+  
+  #remove unknown genes
+  gene.exp<-gene.exp[!(gene.exp$gene=="?"),]
+  
+  #unique gene names
+  unique.genes <- unique(gene.exp$gene)
+  
+  return(gene.exp)
+}
+
+d1<-ex.genes(matches[1])
+d2<-ex.genes(matches[2])
+
+k<-sum(!(d1$gene == unique.genes))
+
+
+a<-c(1,2,3,4,5)
+b<-c()
+
+# Merge all gene expresssion files into one text file ---------------------
+
+library(doParallel)
+registerDoParallel(cores = 4)
+library(foreach)
+all.gene <- foreach(i = matches, .combine = rbind) %dopar% read.table(i, header = TRUE)
+
+#rm(gene.exp)
+rm(all.gene)
