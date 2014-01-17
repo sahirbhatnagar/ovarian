@@ -5,16 +5,12 @@
 # hosted on Github repo 'sahirbhatnagar/ovarian'
 ##################################
 
-getwd()
-setwd("/home/sahir/git_repositories/ovarian/")
-source("pheno.R")
-source("matches.R")
-
 # Create function to merge gene exp with pheno data ---------------------
 
 library(data.table)
 library(reshape)
-f.gene <- function(filename, type="raw_counts"){
+f.gene <- function(filename, type="raw_counts", dir="/home/sahir/git_repositories/ovarian/data"){
+  setwd(dir)
   #import gene expression file
   gene.exp <- read.table(filename, header=TRUE)
   
@@ -26,7 +22,7 @@ f.gene <- function(filename, type="raw_counts"){
   gene.exp<-gene.exp[!(gene.exp$gene=="?"),]
   
   #rename raw_counts column to ID number of person
-  id.number.original <- unique(substring(gene.exp$barcode,first=1,last=12))
+  id.number.original <- unique(substring(gene.exp$barcode,first=1,last=16))
   
   id.number <- gsub("-",c("_"),id.number.original)
   
@@ -51,26 +47,28 @@ f.gene <- function(filename, type="raw_counts"){
 }
 
 
-# merge two data.tables. this works
-l <- f.gene(matches[2], type="raw_counts")
-m <- f.gene(matches[3], type="raw_counts")
-
-setkey(l, gene)
-res <- l[m]
-
-
-
-
-
-
-
-
-# Merge all gene expresssion files into one text file ---------------------
+# Merge all gene expresssion files into one data file ---------------------
 
 library(doParallel)
 registerDoParallel(cores = 4)
 library(foreach)
-all.gene <- foreach(i = matches, .combine = rbind) %dopar% read.table(i, header = TRUE)
+#system.time(res <- lapply(matches, f.gene))
+#this is faster than lapply
+all.gene <- foreach(i = matches) %dopar% f.gene(i)
 
-#rm(gene.exp)
-rm(all.gene)
+
+
+# This produces the final dataset to be analysed --------------------------
+
+lapply(all.gene, function(i) setkey(i,gene))
+final.data <- Reduce(merge,all.gene)
+
+
+
+
+
+
+
+
+
+
