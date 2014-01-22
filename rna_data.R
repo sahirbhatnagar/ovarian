@@ -50,7 +50,12 @@ f.gene <- function(filename, type="raw_counts", dir="/home/sahir/git_repositorie
 # Merge all gene expresssion files into one data file ---------------------
 
 
-
+library(doParallel)
+registerDoParallel(cores = 4)
+library(foreach)
+#system.time(res <- lapply(matches, f.gene))
+#this is faster than lapply
+all.gene <- foreach(i = matches) %dopar% f.gene(i)
 
 
 # This produces the final dataset to be analysed --------------------------
