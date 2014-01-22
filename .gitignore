@@ -10,7 +10,7 @@ figure/*
 *.gz
 *.tex
 .Rproj.user
-
 # Ignore RNA_seq data #
 #######################
 data
+.Rhistory
