@@ -9,6 +9,11 @@
 
 library(data.table)
 library(reshape)
+
+# other possible types are 
+# "median_length_normalized"
+# "RPKM"
+
 f.gene <- function(filename, type="raw_counts", dir="/home/sahir/git_repositories/ovarian/data"){
   setwd(dir)
   #import gene expression file
