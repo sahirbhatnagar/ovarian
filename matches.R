@@ -6,7 +6,7 @@
 ##################################
 
 # Find people for who we have both phenotype and gene expression data --------------------
-setwd("/home/sahir/git_repositories/ovarian/data")
+setwd(gene.path)
 file.names <- list.files(pattern = "[.]txt$")
 k <- lapply(o.pheno2$ID, function(i) grep(i,file.names, perl=TRUE, value=TRUE))
 
@@ -15,4 +15,4 @@ k <- lapply(o.pheno2$ID, function(i) grep(i,file.names, perl=TRUE, value=TRUE))
 # files for which we have phenotype data and gene expression data (n=133)
 matches <- unlist(k)
 
-setwd("/home/sahir/git_repositories/ovarian/")
+setwd(phenotype.path)

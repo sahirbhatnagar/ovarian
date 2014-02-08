@@ -14,7 +14,7 @@ library(reshape)
 # "median_length_normalized"
 # "RPKM"
 
-f.gene <- function(filename, type="raw_counts", dir="/home/sahir/git_repositories/ovarian/data"){
+f.gene <- function(filename, type="raw_counts", dir=gene.path){
   setwd(dir)
   #import gene expression file
   gene.exp <- read.table(filename, header=TRUE)
@@ -60,7 +60,7 @@ registerDoParallel(cores = 4)
 library(foreach)
 #system.time(res <- lapply(matches, f.gene))
 #this is faster than lapply
-all.gene <- foreach(i = matches) %dopar% f.gene(i)
+all.gene <- foreach(i = matches) %dopar% f.gene(i, type=type)
 
 
 # This produces the final dataset to be analysed --------------------------

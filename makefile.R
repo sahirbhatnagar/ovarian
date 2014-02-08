@@ -5,8 +5,18 @@
 # hosted on Github repo 'sahirbhatnagar/ovarian'
 ##################################
 
-getwd()
-setwd("/home/sahir/git_repositories/ovarian/")
+# path for the phenotype file
+phenotype.path <- "/home/sahir/git_repositories/ovarian/"
+#path for the gene expression data
+gene.path <- "/home/sahir/git_repositories/ovarian/data"
+type <- "RPKM"
+# type <- "median_length_normalized"
+# type <- "raw_counts"
+
 source("pheno.R")
 source("matches.R")
 source("rna_data.R")
+
+getwd()
+write.csv(final.data, "finaldata")
+f<-read.csv("finaldata", header=TRUE)

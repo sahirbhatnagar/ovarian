@@ -7,8 +7,7 @@
 
 
 # Import Data -------------------------------------------------------------
-getwd()
-setwd("/home/sahir/git_repositories/ovarian/")
+setwd(phenotype.path)
 
 # From Github
 # library(repmis)
